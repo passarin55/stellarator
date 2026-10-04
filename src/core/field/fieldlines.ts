@@ -22,6 +22,8 @@ export interface TraceOptions {
   sectionFractions?: number[];
   /** magnetic axis at phi0 (enables iota measurement) */
   axis?: { R: number; Z: number };
+  /** record the Cartesian path of each line for this many steps (for 3D display) */
+  record3D?: number;
 }
 
 export interface TracedLine {
@@ -33,6 +35,8 @@ export interface TracedLine {
   /** field-line length travelled before being lost (or total length) [m] */
   length: number;
   transitsCompleted: number;
+  /** xyz interleaved, present when TraceOptions.record3D > 0 */
+  path?: Float32Array;
 }
 
 const tmp = new Float64Array(3);
@@ -174,6 +178,9 @@ export function traceFieldLines(
   }
   const done = new Float64Array(nl);
   const phiDone = new Float64Array(nl);
+  const rec = Math.max(0, opts.record3D ?? 0);
+  const paths = rec ? starts.map(() => new Float32Array(3 * rec)) : null;
+  const pathLen = new Int32Array(nl);
 
   for (let p = 0; p < totalPeriods; p++) {
     for (let st = 0; st < stepsPerPeriod; st++) {
@@ -190,6 +197,13 @@ export function traceFieldLines(
           continue;
         }
         phiDone[l] += h;
+        if (paths && pathLen[l] < rec) {
+          const k = 3 * pathLen[l]++;
+          const ph = phi + h;
+          paths[l][k] = states[l][0] * Math.cos(ph);
+          paths[l][k + 1] = states[l][0] * Math.sin(ph);
+          paths[l][k + 2] = states[l][1];
+        }
         if (axisAlive && ax) {
           const th = Math.atan2(states[l][1] - ax[1], states[l][0] - ax[0]);
           let d = th - thetaPrev[l];
@@ -211,6 +225,7 @@ export function traceFieldLines(
     lost: !alive[l],
     length: states[l][2],
     transitsCompleted: done[l],
+    path: paths ? paths[l].slice(0, 3 * pathLen[l]) : undefined,
   }));
 }
 

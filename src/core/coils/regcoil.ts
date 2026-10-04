@@ -257,9 +257,6 @@ export function solveRegcoil(inp: RegcoilInput, onProgress?: (stage: string, f: 
     maxK = 0,
     areaC = 0;
   for (let j = 0; j < npPer; j++) {
-    let Kx = 0,
-      Ky = 0,
-      Kz = 0;
     let phiT = I / (2 * Math.PI);
     let phiZ = G / (2 * Math.PI);
     for (let k = 0; k < nb; k++) {
@@ -268,9 +265,9 @@ export function solveRegcoil(inp: RegcoilInput, onProgress?: (stage: string, f: 
       phiZ += -modes[k].n * nfp * c;
     }
     const inv = 1 / cg.normN[j];
-    Kx = (phiT * cg.rz[3 * j] - phiZ * cg.rt[3 * j]) * inv;
-    Ky = (phiT * cg.rz[3 * j + 1] - phiZ * cg.rt[3 * j + 1]) * inv;
-    Kz = (phiT * cg.rz[3 * j + 2] - phiZ * cg.rt[3 * j + 2]) * inv;
+    const Kx = (phiT * cg.rz[3 * j] - phiZ * cg.rt[3 * j]) * inv;
+    const Ky = (phiT * cg.rz[3 * j + 1] - phiZ * cg.rt[3 * j + 1]) * inv;
+    const Kz = (phiT * cg.rz[3 * j + 2] - phiZ * cg.rt[3 * j + 2]) * inv;
     const K = Math.hypot(Kx, Ky, Kz);
     KMap[j] = K;
     chi2K += K * K * cg.normN[j] * dA_c;

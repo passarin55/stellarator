@@ -68,12 +68,12 @@ const MU0 = 4e-7 * Math.PI;
 // 16-point Gauss–Legendre on [0,1]
 const GL = (() => {
   const x = [
-    -0.989400934991649932596, -0.944575023073232576078, -0.865631202387831743880, -0.755404408355003033895,
-    -0.617876244402643748447, -0.458016777657227386342, -0.281603550779258913230, -0.095012509837637440185,
+    -0.9894009349916499, -0.9445750230732326, -0.8656312023878318, -0.755404408355003,
+    -0.6178762444026438, -0.45801677765722737, -0.2816035507792589, -0.09501250983763744,
   ];
   const w = [
-    0.027152459411754094852, 0.062253523938647892863, 0.095158511682492784810, 0.124628971255533872052,
-    0.149595988816576732081, 0.169156519395002538189, 0.182603415044923588867, 0.189450610455068496285,
+    0.027152459411754096, 0.062253523938647894, 0.09515851168249279, 0.12462897125553388,
+    0.14959598881657674, 0.16915651939500254, 0.18260341504492358, 0.1894506104550685,
   ];
   const nodes: number[] = [];
   const weights: number[] = [];
@@ -143,7 +143,6 @@ export function powerBalance(p: PlasmaParams): PowerBalance {
   let Paux = p.Paux ?? NaN;
   let tauE: number;
   const P_absorbed = (paux: number) => fa * Palpha + paux;
-  let tauISS: number;
   if (Number.isNaN(Paux)) {
     // Solve for Paux such that the required τE equals the ISS04 prediction (H = 1).
     // f(Paux) = W/(Pabs − Pbrems) − fRen·τISS04(Pabs); monotone in practice
@@ -170,7 +169,7 @@ export function powerBalance(p: PlasmaParams): PowerBalance {
   }
   const Pabs = P_absorbed(Paux);
   tauE = Wth / 1e6 / Math.max(1e-9, Pabs - Pbrems);
-  tauISS = fRen * iss04(a, R, Pabs, nLine * 10, B, p.iota23);
+  const tauISS = fRen * iss04(a, R, Pabs, nLine * 10, B, p.iota23);
   const nSudo = sudoLimit(Pabs, B, a, R);
   if (!Number.isFinite(tauE)) tauE = 0;
   return {
